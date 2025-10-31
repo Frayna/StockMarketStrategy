@@ -47,24 +47,31 @@ export const StockDataDisplay: React.FC = () => {
       <div className="w-full mx-auto">
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-6">Stock Market Data Visualization</h1>
-          <form onSubmit={handleSymbolChange} className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <input
-              type="text"
-              name="symbol"
-              defaultValue={symbol}
-              placeholder="Enter stock symbol"
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <button type="submit" className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
-              Load Data
-            </button>
-            <button
-              type="button"
-              onClick={refetch}
-              className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
-            >
-              Refresh
-            </button>
+          <form onSubmit={handleSymbolChange} className="flex flex-col sm:flex-row gap-4 justify-center items-stretch sm:items-center max-w-2xl mx-auto">
+            <div>
+              <input
+                type="text"
+                name="symbol"
+                defaultValue={symbol}
+                placeholder="Enter stock symbol"
+                className="w-[300px] px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
+              />
+            </div>
+            <div className="flex flex-row gap-12">
+              <button
+                type="submit"
+                className="flex-1 sm:flex-none px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 whitespace-nowrap"
+              >
+                Load
+              </button>
+              <button
+                type="button"
+                onClick={refetch}
+                className="flex-1 sm:flex-none px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 whitespace-nowrap"
+              >
+                Refresh
+              </button>
+            </div>
           </form>
         </div>
 
