@@ -17,7 +17,7 @@ A React TypeScript application that fetches stock market data from the Boursoram
 - **React 18** with TypeScript for type safety
 - **Vite** for fast development and building
 - **Chart.js** with react-chartjs-2 for data visualization
-- **Axios** for HTTP requests
+- **Native Fetch API** for HTTP requests
 - **date-fns** for date handling in charts
 - **Yarn** as package manager
 

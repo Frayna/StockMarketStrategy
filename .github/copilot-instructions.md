@@ -7,7 +7,7 @@ This is a React TypeScript application for visualizing stock market data fetched
 ## Project Structure
 - Uses React with TypeScript for type safety
 - Chart.js with react-chartjs-2 for data visualization
-- Axios for API requests
+- Native fetch API for HTTP requests
 - Custom hooks for data management
 - Responsive design with modern UI
 

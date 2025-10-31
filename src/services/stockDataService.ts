@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { StockTick } from '../types/stockData';
 
 // Use proxy endpoint in development, direct API in production
@@ -13,28 +12,36 @@ export class StockDataService {
     period: number = 0
   ): Promise<StockTick[]> {
     try {
-      const params = {
+      const params = new URLSearchParams({
         symbol,
-        length,
-        period,
+        length: length.toString(),
+        period: period.toString(),
         guid: ''
-      };
+      });
 
-      console.log('Fetching data with params:', params);
+      console.log('Fetching data with params:', { symbol, length, period, guid: '' });
 
-      const response = await axios.get<any>(BOURSORAMA_API_URL, {
-        params,
+      const url = `${BOURSORAMA_API_URL}?${params.toString()}`;
+      
+      const response = await fetch(url, {
+        method: 'GET',
         headers: {
           'Accept': 'application/json',
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
       });
 
-      console.log('API Response:', response.data.d.QuoteTab);
-      if (response.data && response.data.d && response.data.d.QuoteTab && Array.isArray(response.data.d.QuoteTab)) {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      console.log('API Response:', data.d?.QuoteTab);
+      if (data && data.d && data.d.QuoteTab && Array.isArray(data.d.QuoteTab)) {
         // Expected nested structure
         console.log('Nested structure found');
-        return response.data.d.QuoteTab;
+        return data.d.QuoteTab;
       } else {
         console.log('Unknown response structure, no data available');
         return [];

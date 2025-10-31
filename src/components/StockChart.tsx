@@ -3,26 +3,25 @@ import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
-  PointElement,
-  LineElement,
   Title,
   Tooltip,
   Legend,
   TimeScale,
 } from 'chart.js';
-import { Line } from 'react-chartjs-2';
+import { Chart } from 'react-chartjs-2';
+import { CandlestickController, CandlestickElement } from 'chartjs-chart-financial';
 import 'chartjs-adapter-date-fns';
 import { StockTick } from '../types/stockData';
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
-  PointElement,
-  LineElement,
   Title,
   Tooltip,
   Legend,
-  TimeScale
+  TimeScale,
+  CandlestickController,
+  CandlestickElement
 );
 
 interface StockChartProps {
@@ -32,41 +31,34 @@ interface StockChartProps {
 
 export const StockChart: React.FC<StockChartProps> = ({ data, title = 'Stock Price Chart' }) => {
   const chartData = {
-    labels: data.map(tick => new Date(tick.d)),
     datasets: [
       {
-        label: 'Close Price',
-        data: data.map(tick => tick.c),
-        borderColor: 'rgb(75, 192, 192)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        borderWidth: 2,
-        fill: false,
-        tension: 0.1,
-      },
-      {
-        label: 'High Price',
-        data: data.map(tick => tick.h),
-        borderColor: 'rgb(255, 99, 132)',
-        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        label: 'Stock Price',
+        data: data.map(tick => ({
+          x: tick.d,
+          o: tick.o, // open
+          h: tick.h, // high
+          l: tick.l, // low
+          c: tick.c, // close
+        })),
+        color: {
+          up: '#26a69a',   // green for bullish candles (close > open)
+          down: '#ef5350', // red for bearish candles (close < open)
+          unchanged: '#999', // gray for unchanged
+        },
+        borderColor: '#333',
         borderWidth: 1,
-        fill: false,
-        tension: 0.1,
-      },
-      {
-        label: 'Low Price',
-        data: data.map(tick => tick.l),
-        borderColor: 'rgb(54, 162, 235)',
-        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-        borderWidth: 1,
-        fill: false,
-        tension: 0.1,
-      },
+      } as any, // Type assertion to bypass strict typing issues
     ],
   };
 
   const options = {
     responsive: true,
     maintainAspectRatio: false,
+    interaction: {
+      intersect: false,
+      mode: 'index' as const,
+    },
     layout: {
       padding: {
         top: 20,
@@ -77,10 +69,7 @@ export const StockChart: React.FC<StockChartProps> = ({ data, title = 'Stock Pri
     },
     plugins: {
       legend: {
-        position: 'top' as const,
-        labels: {
-          padding: 20,
-        },
+        display: false, // Hide legend for cleaner look
       },
       title: {
         display: true,
@@ -92,6 +81,23 @@ export const StockChart: React.FC<StockChartProps> = ({ data, title = 'Stock Pri
         padding: {
           top: 10,
           bottom: 30,
+        },
+      },
+      tooltip: {
+        callbacks: {
+          title: (context: any) => {
+            const date = new Date(context[0].parsed.x);
+            return date.toLocaleDateString();
+          },
+          label: (context: any) => {
+            const data = context.parsed;
+            return [
+              `Open: €${data.o?.toFixed(2) || 'N/A'}`,
+              `High: €${data.h?.toFixed(2) || 'N/A'}`,
+              `Low: €${data.l?.toFixed(2) || 'N/A'}`,
+              `Close: €${data.c?.toFixed(2) || 'N/A'}`,
+            ];
+          },
         },
       },
     },
@@ -109,6 +115,7 @@ export const StockChart: React.FC<StockChartProps> = ({ data, title = 'Stock Pri
         },
         grid: {
           display: true,
+          color: 'rgba(0, 0, 0, 0.1)',
         },
       },
       y: {
@@ -118,6 +125,7 @@ export const StockChart: React.FC<StockChartProps> = ({ data, title = 'Stock Pri
         },
         grid: {
           display: true,
+          color: 'rgba(0, 0, 0, 0.1)',
         },
       },
     },
@@ -126,7 +134,7 @@ export const StockChart: React.FC<StockChartProps> = ({ data, title = 'Stock Pri
   return (
     <div className="w-full bg-white rounded-lg shadow-lg p-6">
       <div style={{ position: 'relative', height: '500px', width: '100%' }}>
-        <Line data={chartData} options={options} />
+        <Chart type="candlestick" data={chartData} options={options} />
       </div>
     </div>
   );
