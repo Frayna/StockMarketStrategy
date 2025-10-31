@@ -3,7 +3,7 @@ import { useStockData } from '../hooks/useStockData';
 import { StockChart } from './StockChart';
 
 export const StockDataDisplay: React.FC = () => {
-  const [symbol, setSymbol] = useState('1rTDCAM');
+  const [symbol, setSymbol] = useState('1rTCW8');
   const { data, loading, error, refetch } = useStockData(symbol);
 
   const handleSymbolChange = (e: React.FormEvent<HTMLFormElement>) => {

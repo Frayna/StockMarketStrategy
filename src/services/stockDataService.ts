@@ -7,7 +7,7 @@ const BOURSORAMA_API_URL = import.meta.env.DEV
 
 export class StockDataService {
   static async fetchStockData(
-    symbol: string = '1rTDCAM',
+    symbol: string = '1rTCW8',
     length: number = 7300,
     period: number = 0
   ): Promise<StockTick[]> {
@@ -22,7 +22,7 @@ export class StockDataService {
       console.log('Fetching data with params:', { symbol, length, period, guid: '' });
 
       const url = `${BOURSORAMA_API_URL}?${params.toString()}`;
-      
+
       const response = await fetch(url, {
         method: 'GET',
         headers: {
