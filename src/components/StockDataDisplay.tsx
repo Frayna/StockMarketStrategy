@@ -33,7 +33,7 @@ export const StockDataDisplay: React.FC = () => {
           <div className="text-red-600 text-xl mb-4">Error: {error}</div>
           <button
             onClick={refetch}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+            className="relative px-6 py-2 bg-linear-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-500 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-105 overflow-hidden cursor-pointer before:absolute before:top-0 before:-left-full before:w-[200%] before:h-full before:bg-linear-to-r before:from-transparent before:via-white/25 before:to-transparent before:transition-transform before:duration-800 before:ease-out hover:before:translate-x-[50%]"
           >
             Retry
           </button>
@@ -57,19 +57,19 @@ export const StockDataDisplay: React.FC = () => {
                 className="w-[300px] px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
               />
             </div>
-            <div className="flex flex-row gap-12">
+            <div className="flex flex-row gap-4">
               <button
                 type="submit"
-                className="flex-1 sm:flex-none px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 whitespace-nowrap"
+                className="relative flex-1 sm:flex-none px-6 py-3 bg-linear-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 border-none font-medium transition-all duration-500 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-105 overflow-hidden cursor-pointer before:absolute before:top-0 before:-left-full before:w-[200%] before:h-full before:bg-linear-to-r before:from-transparent before:via-white/25 before:to-transparent before:transition-transform before:duration-800 before:ease-out hover:before:translate-x-[50%]"
               >
-                Load
+                📊 Load
               </button>
               <button
                 type="button"
                 onClick={refetch}
-                className="flex-1 sm:flex-none px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 whitespace-nowrap"
+                className="relative flex-1 sm:flex-none px-6 py-3 bg-linear-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 border-none font-medium transition-all duration-500 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-105 overflow-hidden cursor-pointer before:absolute before:top-0 before:-left-full before:w-[200%] before:h-full before:bg-linear-to-r before:from-transparent before:via-white/25 before:to-transparent before:transition-transform before:duration-800 before:ease-out hover:before:translate-x-[50%]"
               >
-                Refresh
+                🔄 Refresh
               </button>
             </div>
           </form>
