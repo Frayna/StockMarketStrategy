@@ -9,6 +9,7 @@ import {
   TimeScale,
   LineElement,
   PointElement,
+  LegendItem,
 } from 'chart.js';
 import { Chart } from 'react-chartjs-2';
 import { CandlestickController, CandlestickElement } from 'chartjs-chart-financial';
@@ -114,7 +115,7 @@ export const StockChart: React.FC<StockChartProps> = ({ data, title = 'Stock Pri
         display: true,
         position: 'top' as const,
         labels: {
-          filter: function(item) {
+          filter: function(item: LegendItem) {
             return item.text !== 'Stock Price'; // Hide candlestick legend for cleaner look
           }
         }
@@ -139,12 +140,12 @@ export const StockChart: React.FC<StockChartProps> = ({ data, title = 'Stock Pri
           },
           label: (context: any) => {
             const data = context.parsed;
-            return [
+            return data.o && data.h && data.l && data.c ? [
               `Open: €${data.o?.toFixed(2) || 'N/A'}`,
               `High: €${data.h?.toFixed(2) || 'N/A'}`,
               `Low: €${data.l?.toFixed(2) || 'N/A'}`,
               `Close: €${data.c?.toFixed(2) || 'N/A'}`,
-            ];
+            ] : [];
           },
         },
       },
