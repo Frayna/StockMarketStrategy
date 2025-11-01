@@ -5,12 +5,18 @@ const BOURSORAMA_API_URL = import.meta.env.DEV
   ? '/api/bourse/action/graph/ws/GetTicksEOD'
   : 'https://www.boursorama.com/bourse/action/graph/ws/GetTicksEOD';
 
+export interface StockDataResult {
+  data: StockTick[];
+  name: string;
+  symbol: string;
+}
+
 export class StockDataService {
   static async fetchStockData(
     symbol: string = '1rTCW8',
     length: number = 7300,
     period: number = 0
-  ): Promise<StockTick[]> {
+  ): Promise<StockDataResult> {
     try {
       const params = new URLSearchParams({
         symbol,
@@ -35,20 +41,35 @@ export class StockDataService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const apiData = await response.json();
 
-      console.log('API Response:', data.d?.QuoteTab);
-      if (data && data.d && data.d.QuoteTab && Array.isArray(data.d.QuoteTab)) {
+      console.log('API Response:', apiData.d?.QuoteTab);
+      console.log('Stock Name:', apiData.d?.Name);
+
+      if (apiData && apiData.d && apiData.d.QuoteTab && Array.isArray(apiData.d.QuoteTab)) {
         // Expected nested structure
         console.log('Nested structure found');
-        return data.d.QuoteTab;
+        return {
+          data: apiData.d.QuoteTab,
+          name: apiData.d.Name || symbol,
+          symbol: symbol
+        };
       } else {
         console.log('Unknown response structure, no data available');
-        return [];
+        return {
+          data: [],
+          name: symbol,
+          symbol: symbol
+        };
       }
     } catch (error) {
       console.error('Error fetching stock data:', error);
-      throw error; // Let the error bubble up instead of returning mock data
+      // Return error structure instead of throwing
+      return {
+        data: [],
+        name: symbol,
+        symbol: symbol
+      };
     }
   }
 }

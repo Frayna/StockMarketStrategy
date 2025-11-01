@@ -10,6 +10,7 @@ import {
 } from 'chart.js';
 import { Chart } from 'react-chartjs-2';
 import { CandlestickController, CandlestickElement } from 'chartjs-chart-financial';
+import zoomPlugin from 'chartjs-plugin-zoom';
 import 'chartjs-adapter-date-fns';
 import { StockTick } from '../types/stockData';
 
@@ -21,7 +22,8 @@ ChartJS.register(
   Legend,
   TimeScale,
   CandlestickController,
-  CandlestickElement
+  CandlestickElement,
+  zoomPlugin
 );
 
 interface StockChartProps {
@@ -30,12 +32,20 @@ interface StockChartProps {
 }
 
 export const StockChart: React.FC<StockChartProps> = ({ data, title = 'Stock Price Chart' }) => {
+  const chartRef = React.useRef<ChartJS<'candlestick'>>(null);
+
+  const resetZoom = () => {
+    if (chartRef.current) {
+      chartRef.current.resetZoom();
+    }
+  };
+
   const chartData = {
     datasets: [
       {
         label: 'Stock Price',
         data: data.map(tick => ({
-          x: tick.d,
+          x: tick.d * 24 * 60 * 60 * 1000, // approximate date based on index
           o: tick.o, // open
           h: tick.h, // high
           l: tick.l, // low
@@ -100,6 +110,27 @@ export const StockChart: React.FC<StockChartProps> = ({ data, title = 'Stock Pri
           },
         },
       },
+      zoom: {
+        pan: {
+          enabled: true,
+          mode: 'xy' as const,
+          threshold: 10,
+        },
+        zoom: {
+          wheel: {
+            enabled: true,
+          },
+          pinch: {
+            enabled: true,
+          },
+          mode: 'xy' as const,
+          sensitivity: 0.1,
+        },
+        limits: {
+          x: { min: 'original' as const, max: 'original' as const },
+          y: { min: 'original' as const, max: 'original' as const },
+        },
+      },
     },
     scales: {
       x: {
@@ -133,8 +164,19 @@ export const StockChart: React.FC<StockChartProps> = ({ data, title = 'Stock Pri
 
   return (
     <div className="w-full bg-white rounded-lg shadow-lg p-6">
+      <div className="flex justify-between items-center mb-4">
+        <div className="text-sm text-gray-600">
+          Use mouse wheel to zoom, drag to pan
+        </div>
+        <button
+          onClick={resetZoom}
+          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200 text-sm font-medium"
+        >
+          Reset Zoom
+        </button>
+      </div>
       <div style={{ position: 'relative', height: '500px', width: '100%' }}>
-        <Chart type="candlestick" data={chartData} options={options} />
+        <Chart ref={chartRef} type="candlestick" data={chartData} options={options} />
       </div>
     </div>
   );

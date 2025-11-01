@@ -4,6 +4,7 @@ import { StockDataService } from '../services/stockDataService';
 
 export const useStockData = (symbol: string = '1rTDCAM') => {
   const [data, setData] = useState<StockTick[]>([]);
+  const [stockName, setStockName] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -11,9 +12,10 @@ export const useStockData = (symbol: string = '1rTDCAM') => {
     try {
       setLoading(true);
       setError(null);
-      const stockData = await StockDataService.fetchStockData(symbol);
-	  console.log('Fetched stock data:', stockData);
-      setData(stockData);
+      const result = await StockDataService.fetchStockData(symbol);
+	  console.log('Fetched stock data:', result);
+      setData(result.data);
+      setStockName(result.name);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -31,6 +33,7 @@ export const useStockData = (symbol: string = '1rTDCAM') => {
 
   return {
     data,
+    stockName,
     loading,
     error,
     refetch

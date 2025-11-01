@@ -4,7 +4,7 @@ import { StockChart } from './StockChart';
 
 export const StockDataDisplay: React.FC = () => {
   const [symbol, setSymbol] = useState('1rTCW8');
-  const { data, loading, error, refetch } = useStockData(symbol);
+  const { data, stockName, loading, error, refetch } = useStockData(symbol);
 
   const handleSymbolChange = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -78,7 +78,7 @@ export const StockDataDisplay: React.FC = () => {
         {data.length > 0 ? (
           <>
             <div className="w-full mb-8">
-              <StockChart data={data} title={`${symbol} Stock Price Chart`} />
+              <StockChart data={data} title={stockName ? `${stockName} (${symbol})` : `${symbol} Stock Price Chart`} />
             </div>
             <div className="max-w-7xl mx-auto">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">

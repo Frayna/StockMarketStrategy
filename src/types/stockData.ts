@@ -1,5 +1,5 @@
 export interface StockTick {
-  d: number; // Date timestamp
+  d: number; // Day number (since epoch or similar)
   o: number; // Open price
   h: number; // High price
   l: number; // Low price
