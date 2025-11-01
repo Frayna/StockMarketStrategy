@@ -42,7 +42,7 @@ export class StockDataService {
 
     // In production, try CORS proxies with fallback
     const baseUrl = `${BOURSORAMA_BASE_URL}?${params.toString()}`;
-    
+
     // First try direct request (might work in some cases)
     try {
       return await this.fetchWithUrl(baseUrl, symbol);
