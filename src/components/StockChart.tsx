@@ -184,6 +184,37 @@ export const StockChart: React.FC<StockChartProps> = ({ data, title = 'Stock Pri
     };
   });
 
+  // Calculate 2x leveraged compound growth using actual daily returns from candles
+  const leveragedCompoundData: Array<{x: number, y: number}> = [];
+  let currentLeveragedValue = initialPrice;
+
+  visibleData.forEach((tick, index) => {
+    if (index === 0) {
+      leveragedCompoundData.push({
+        x: tick.d * 24 * 60 * 60 * 1000,
+        y: currentLeveragedValue,
+      });
+    } else {
+      // Get the previous day's closing price
+      const previousClose = visibleData[index - 1].c;
+      const currentClose = tick.c;
+
+      // Calculate the daily return
+      const dailyReturn = (currentClose - previousClose) / previousClose;
+
+      // Apply 2x leverage to the daily return
+      const leveragedReturn = dailyReturn * 2;
+
+      // Update the leveraged value
+      currentLeveragedValue = currentLeveragedValue * (1 + leveragedReturn);
+
+      leveragedCompoundData.push({
+        x: tick.d * 24 * 60 * 60 * 1000,
+        y: currentLeveragedValue,
+      });
+    }
+  });
+
   const chartData = {
     datasets: [
       {
@@ -209,11 +240,24 @@ export const StockChart: React.FC<StockChartProps> = ({ data, title = 'Stock Pri
         data: compoundingData,
         borderColor: '#8b5cf6',
         backgroundColor: 'rgba(139, 92, 246, 0.1)',
-        borderWidth: 3,
+        borderWidth: 2,
         pointRadius: 0,
         pointHoverRadius: 4,
         fill: false,
         tension: 0,
+      },
+      {
+        type: 'line' as const,
+        label: '2x Leveraged (Daily Returns)',
+        data: leveragedCompoundData,
+        borderColor: '#ff6b35',
+        backgroundColor: 'rgba(255, 107, 53, 0.1)',
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        fill: false,
+        tension: 0,
+        borderDash: [5, 5], // Dashed line to distinguish from regular compound growth
       },
     ],
   };
