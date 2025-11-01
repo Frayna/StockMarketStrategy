@@ -13,7 +13,7 @@ export const useStockData = (symbol: string = '1rTDCAM') => {
       setLoading(true);
       setError(null);
       const result = await StockDataService.fetchStockData(symbol);
-	  console.log('Fetched stock data:', result);
+      console.log('Fetched stock data:', result);
       setData(result.data);
       setStockName(result.name);
     } catch (err) {

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useStockData } from '../hooks/useStockData';
 import { StockChart } from './StockChart';
 import { StockStats } from './StockStats';
+import { CompoundComparisonPieChart } from './CompoundComparisonPieChart';
 
 export const StockDataDisplay: React.FC = () => {
   const [symbol, setSymbol] = useState('1rTCW8');
@@ -81,7 +82,17 @@ export const StockDataDisplay: React.FC = () => {
             <div className="w-full mb-8">
               <StockChart data={data} title={stockName ? `${stockName} (${symbol})` : `${symbol} Stock Price Chart`} />
             </div>
-            <StockStats data={data} />
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
+              <div className="w-full">
+                <CompoundComparisonPieChart 
+                  data={data} 
+                  title={`Price vs Compound Analysis - ${stockName || symbol}`} 
+                />
+              </div>
+              <div className="w-full">
+                <StockStats data={data} />
+              </div>
+            </div>
           </>
         ) : (
           <div className="text-center py-12">
