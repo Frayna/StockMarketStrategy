@@ -2,6 +2,12 @@
 
 A React TypeScript application that fetches stock market data from the Boursorama API and displays it as an interactive graph using Chart.js.
 
+## 🚀 Live Demo
+
+**[View Live Application](https://frayna.github.io/StockMarketStrategy/)**
+
+The app is automatically deployed to GitHub Pages on every push to the main branch.
+
 ## Features
 
 - 📈 **Real-time Stock Data**: Fetches data from Boursorama API
@@ -110,6 +116,29 @@ src/
 - `yarn build` - Build for production
 - `yarn preview` - Preview production build
 - `yarn lint` - Run ESLint
+
+## Deployment
+
+The application is automatically deployed to GitHub Pages using GitHub Actions. Every push to the `main` branch triggers a new deployment.
+
+### Manual Deployment
+
+To deploy manually:
+
+1. Build the project:
+   ```bash
+   yarn build
+   ```
+
+2. The build files will be in the `dist/` directory
+
+3. Push changes to the `main` branch to trigger automatic deployment
+
+### GitHub Pages Configuration
+
+- **Repository**: `Frayna/StockMarketStrategy`
+- **Branch**: `gh-pages` (automatically created by GitHub Actions)
+- **URL**: https://frayna.github.io/StockMarketStrategy/
 
 ## Browser Support
 
