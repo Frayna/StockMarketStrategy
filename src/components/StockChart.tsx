@@ -321,6 +321,18 @@ export const StockChart: React.FC<StockChartProps> = ({ data, title = 'Stock Pri
 
   return (
     <div className="w-full bg-white rounded-lg shadow-lg p-6">
+      <div
+        ref={panRef}
+        style={{ position: 'relative', height: '500px', width: '100%' }}
+        className={`select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} mb-4`}
+        onMouseDown={handleMouseDown}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        <Chart ref={chartRef} type="candlestick" data={chartData} options={options} />
+      </div>
+
       <div className="flex justify-between items-center mb-4">
         <div className="text-sm text-gray-600">
           <div>Showing {visibleData.length} of {data.length} data points (from {windowStart + 1} to {windowStart + visibleData.length})</div>
@@ -365,18 +377,6 @@ export const StockChart: React.FC<StockChartProps> = ({ data, title = 'Stock Pri
           <span>Start of data</span>
           <span>End of data</span>
         </div>
-      </div>
-
-      <div
-        ref={panRef}
-        style={{ position: 'relative', height: '500px', width: '100%' }}
-        className={`select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-        onMouseDown={handleMouseDown}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
-        <Chart ref={chartRef} type="candlestick" data={chartData} options={options} />
       </div>
     </div>
   );

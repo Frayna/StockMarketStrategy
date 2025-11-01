@@ -136,10 +136,6 @@ export const CompoundComparisonPieChart: React.FC<CompoundComparisonPieChartProp
     },
   };
 
-  // Additional statistics
-  const avgDailyGrowthPercent = (dailyGrowthRate * 100).toFixed(3);
-  const totalReturnPercent = (totalReturn * 100).toFixed(2);
-
   return (
     <div className="w-full bg-white rounded-lg shadow-lg p-6 h-full">
       {isFiltered && (
@@ -153,25 +149,6 @@ export const CompoundComparisonPieChart: React.FC<CompoundComparisonPieChartProp
           </div>
         </div>
       )}
-      <div className="mb-4 bg-gray-50 rounded-lg p-4">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">Compound Growth Analysis</h3>
-        <div className="text-sm text-gray-600 space-y-1">
-          <div className="flex justify-between">
-            <span>Daily Growth Rate:</span>
-            <span className="font-medium">{avgDailyGrowthPercent}%</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Total Return:</span>
-            <span className={`font-medium ${totalReturn >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {totalReturnPercent}%
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span>Trading Days:</span>
-            <span className="font-medium">{total}</span>
-          </div>
-        </div>
-      </div>
 
       <div style={{ position: 'relative', height: '300px', width: '100%' }}>
         <Pie data={chartData} options={options} />
