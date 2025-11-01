@@ -1,12 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useStockData } from '../hooks/useStockData';
 import { StockChart } from './StockChart';
 import { StockStats } from './StockStats';
 import { CompoundComparisonPieChart } from './CompoundComparisonPieChart';
+import { StockTick } from '../types/stockData';
 
 export const StockDataDisplay: React.FC = () => {
   const [symbol, setSymbol] = useState('1rTCW8');
+  const [visibleData, setVisibleData] = useState<StockTick[]>([]);
   const { data, stockName, loading, error, refetch } = useStockData(symbol);
+
+  const handleVisibleDataChange = useCallback((newVisibleData: StockTick[], _windowStart: number, _windowSize: number) => {
+    setVisibleData(newVisibleData);
+  }, []);
+
+  // Initialize visible data when main data changes
+  React.useEffect(() => {
+    if (data.length > 0 && visibleData.length === 0) {
+      setVisibleData(data);
+    }
+  }, [data, visibleData.length]);
 
   const handleSymbolChange = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -14,6 +27,7 @@ export const StockDataDisplay: React.FC = () => {
     const newSymbol = formData.get('symbol') as string;
     if (newSymbol && newSymbol !== symbol) {
       setSymbol(newSymbol);
+      setVisibleData([]); // Reset visible data when symbol changes
     }
   };
 
@@ -80,17 +94,27 @@ export const StockDataDisplay: React.FC = () => {
         {data.length > 0 ? (
           <>
             <div className="w-full mb-8">
-              <StockChart data={data} title={stockName ? `${stockName} (${symbol})` : `${symbol} Stock Price Chart`} />
+              <StockChart
+                data={data}
+                title={stockName ? `${stockName} (${symbol})` : `${symbol} Stock Price Chart`}
+                onVisibleDataChange={handleVisibleDataChange}
+              />
             </div>
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
               <div className="w-full">
-                <CompoundComparisonPieChart 
-                  data={data} 
-                  title={`Price vs Compound Analysis - ${stockName || symbol}`} 
+                <CompoundComparisonPieChart
+                  data={visibleData.length > 0 ? visibleData : data}
+                  title={`Price vs Compound Analysis - ${stockName || symbol}`}
+                  isFiltered={visibleData.length > 0 && visibleData.length < data.length}
+                  totalDataPoints={data.length}
                 />
               </div>
               <div className="w-full">
-                <StockStats data={data} />
+                <StockStats
+                  data={visibleData.length > 0 ? visibleData : data}
+                  isFiltered={visibleData.length > 0 && visibleData.length < data.length}
+                  totalDataPoints={data.length}
+                />
               </div>
             </div>
           </>

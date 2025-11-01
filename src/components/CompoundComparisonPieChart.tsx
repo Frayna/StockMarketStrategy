@@ -13,11 +13,15 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 interface CompoundComparisonPieChartProps {
   data: StockTick[];
   title?: string;
+  isFiltered?: boolean;
+  totalDataPoints?: number;
 }
 
-export const CompoundComparisonPieChart: React.FC<CompoundComparisonPieChartProps> = ({ 
-  data, 
-  title = 'Closing Prices vs Compound Growth' 
+export const CompoundComparisonPieChart: React.FC<CompoundComparisonPieChartProps> = ({
+  data,
+  title = 'Closing Prices vs Compound Growth',
+  isFiltered = false,
+  totalDataPoints
 }) => {
   // Calculate the compound growth data points
   const initialPrice = data.length > 0 ? data[0].c : 0;
@@ -33,7 +37,7 @@ export const CompoundComparisonPieChart: React.FC<CompoundComparisonPieChartProp
   data.forEach((tick, index) => {
     const compoundedValue = initialPrice * Math.pow(1 + dailyGrowthRate, index);
     const closingPrice = tick.c;
-    
+
     if (closingPrice > compoundedValue) {
       aboveCount++;
     } else if (closingPrice < compoundedValue) {
@@ -138,6 +142,17 @@ export const CompoundComparisonPieChart: React.FC<CompoundComparisonPieChartProp
 
   return (
     <div className="w-full bg-white rounded-lg shadow-lg p-6 h-full">
+      {isFiltered && (
+        <div className="mb-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="flex items-center gap-2 text-blue-800 text-sm">
+            <span>🔍</span>
+            <span className="font-medium">
+              Showing filtered/zoomed data from chart
+              {totalDataPoints && ` (${data.length} of ${totalDataPoints} points)`}
+            </span>
+          </div>
+        </div>
+      )}
       <div className="mb-4 bg-gray-50 rounded-lg p-4">
         <h3 className="text-sm font-semibold text-gray-700 mb-3">Compound Growth Analysis</h3>
         <div className="text-sm text-gray-600 space-y-1">
@@ -157,11 +172,11 @@ export const CompoundComparisonPieChart: React.FC<CompoundComparisonPieChartProp
           </div>
         </div>
       </div>
-      
+
       <div style={{ position: 'relative', height: '300px', width: '100%' }}>
         <Pie data={chartData} options={options} />
       </div>
-      
+
       <div className="mt-4 text-xs text-gray-500 text-center">
         Shows how often actual closing prices exceeded the theoretical compound growth line
       </div>

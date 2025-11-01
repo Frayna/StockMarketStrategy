@@ -4,9 +4,11 @@ import { StockTick } from "../types/stockData";
 
 interface StockStatsProps {
   data: StockTick[];
+  isFiltered?: boolean;
+  totalDataPoints?: number;
 }
 
-export const StockStats: React.FC<StockStatsProps> = ({ data }) => {
+export const StockStats: React.FC<StockStatsProps> = ({ data, isFiltered = false, totalDataPoints }) => {
   if (!data || data.length === 0) {
     return null;
   }
@@ -51,6 +53,17 @@ export const StockStats: React.FC<StockStatsProps> = ({ data }) => {
 
   return (
     <div className="max-w-7xl mx-auto">
+      {isFiltered && (
+        <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="flex items-center gap-2 text-blue-800 text-sm">
+            <span>🔍</span>
+            <span className="font-medium">
+              Statistics for filtered/zoomed data from chart
+              {totalDataPoints && ` (${data.length} of ${totalDataPoints} points)`}
+            </span>
+          </div>
+        </div>
+      )}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         <StatsCard label="Data Points" value={data.length} icon="📊" />
         <StatsCard

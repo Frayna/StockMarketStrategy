@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -14,7 +14,6 @@ import {
 } from 'chart.js';
 import { Chart } from 'react-chartjs-2';
 import { CandlestickController, CandlestickElement } from 'chartjs-chart-financial';
-import zoomPlugin from 'chartjs-plugin-zoom';
 import 'chartjs-adapter-date-fns';
 import { StockTick } from '../types/stockData';
 
@@ -29,33 +28,155 @@ ChartJS.register(
   PointElement,
   LineController,
   CandlestickController,
-  CandlestickElement,
-  zoomPlugin
+  CandlestickElement
 );
 
 interface StockChartProps {
   data: StockTick[];
   title?: string;
+  onVisibleDataChange?: (visibleData: StockTick[], windowStart: number, windowSize: number) => void;
 }
 
-export const StockChart: React.FC<StockChartProps> = ({ data, title = 'Stock Price Chart' }) => {
+export const StockChart: React.FC<StockChartProps> = ({ data, title = 'Stock Price Chart', onVisibleDataChange }) => {
   const chartRef = React.useRef<ChartJS<'candlestick'>>(null);
+  const panRef = React.useRef<HTMLDivElement>(null);
 
-  const resetZoom = () => {
-    if (chartRef.current) {
-      chartRef.current.resetZoom();
+  // State for data window (zoom/pan)
+  const [windowSize, setWindowSize] = useState(Math.min(1000, data.length));
+  const [windowStart, setWindowStart] = useState(Math.max(0, data.length - windowSize));
+
+  // Pan state
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState(0);
+
+  // Get the visible data slice
+  const visibleData = useMemo(() => {
+    const start = Math.max(0, windowStart);
+    const end = Math.min(data.length, windowStart + windowSize);
+    return data.slice(start, end);
+  }, [data, windowStart, windowSize]);
+
+  // Notify parent when visible data changes
+  React.useEffect(() => {
+    if (onVisibleDataChange) {
+      onVisibleDataChange(visibleData, windowStart, windowSize);
     }
-  };
+  }, [visibleData, windowStart, windowSize, onVisibleDataChange]);
 
-  // Calculate percentage-based compounding effect
-  const initialPrice = data.length > 0 ? data[0].c : 0;
-  const finalPrice = data.length > 0 ? data[data.length - 1].c : 0;
+  // Navigation functions
+
+  const zoomIn = useCallback(() => {
+    const newSize = Math.max(10, Math.floor(windowSize * 0.7));
+    const centerPoint = windowStart + windowSize / 2;
+    const newStart = Math.max(0, Math.min(data.length - newSize, centerPoint - newSize / 2));
+    setWindowSize(newSize);
+    setWindowStart(newStart);
+  }, [windowSize, windowStart, data.length]);
+
+  const zoomOut = useCallback(() => {
+    const newSize = Math.min(data.length, Math.floor(windowSize * 1.4));
+    const centerPoint = windowStart + windowSize / 2;
+    const newStart = Math.max(0, Math.min(data.length - newSize, centerPoint - newSize / 2));
+    setWindowSize(newSize);
+    setWindowStart(newStart);
+  }, [windowSize, windowStart, data.length]);
+
+  const resetView = useCallback(() => {
+    setWindowSize(Math.min(1000, data.length));
+    setWindowStart(Math.max(0, data.length - Math.min(1000, data.length)));
+  }, [data.length]);
+
+  // Pan handlers
+  const handlePanStart = useCallback((clientX: number) => {
+    setIsDragging(true);
+    setDragStart(clientX);
+  }, []);
+
+  const handlePanMove = useCallback((clientX: number) => {
+    if (!isDragging) return;
+
+    const deltaX = clientX - dragStart;
+    const panSensitivity = 2; // Adjust sensitivity
+    const deltaPoints = Math.floor(-deltaX / panSensitivity);
+
+    if (Math.abs(deltaPoints) > 0) {
+      setWindowStart(prev => {
+        const newStart = Math.max(0, Math.min(data.length - windowSize, prev + deltaPoints));
+        return newStart;
+      });
+      setDragStart(clientX);
+    }
+  }, [isDragging, dragStart, data.length, windowSize]);
+
+  const handlePanEnd = useCallback(() => {
+    setIsDragging(false);
+    setDragStart(0);
+  }, []);
+
+  // Mouse events
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    handlePanStart(e.clientX);
+  }, [handlePanStart]);
+
+
+
+  // Touch events for mobile
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    handlePanStart(touch.clientX);
+  }, [handlePanStart]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    handlePanMove(touch.clientX);
+  }, [handlePanMove]);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
+    handlePanEnd();
+  }, [handlePanEnd]);
+
+  // Global mouse event listeners for dragging
+  React.useEffect(() => {
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (isDragging) {
+        handlePanMove(e.clientX);
+      }
+    };
+
+    const handleGlobalMouseUp = () => {
+      if (isDragging) {
+        handlePanEnd();
+      }
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleGlobalMouseMove);
+      document.addEventListener('mouseup', handleGlobalMouseUp);
+      document.body.style.cursor = 'grabbing';
+    } else {
+      document.body.style.cursor = '';
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+      document.body.style.cursor = '';
+    };
+  }, [isDragging, handlePanMove, handlePanEnd]);
+
+  // Calculate percentage-based compounding effect using visible data
+  const initialPrice = visibleData.length > 0 ? visibleData[0].c : 0;
+  const finalPrice = visibleData.length > 0 ? visibleData[visibleData.length - 1].c : 0;
 
   // Calculate the daily growth rate that would result in the same total return
   const totalReturn = (finalPrice - initialPrice) / initialPrice;
-  const dailyGrowthRate = Math.pow(1 + totalReturn, 1 / (data.length - 1)) - 1;
+  const dailyGrowthRate = visibleData.length > 1 ? Math.pow(1 + totalReturn, 1 / (visibleData.length - 1)) - 1 : 0;
 
-  const compoundingData = data.map((tick, index) => {
+  const compoundingData = visibleData.map((tick, index) => {
     const compoundedValue = initialPrice * Math.pow(1 + dailyGrowthRate, index);
     return {
       x: tick.d * 24 * 60 * 60 * 1000,
@@ -67,7 +188,7 @@ export const StockChart: React.FC<StockChartProps> = ({ data, title = 'Stock Pri
     datasets: [
       {
         label: 'Stock Price',
-        data: data.map(tick => ({
+        data: visibleData.map(tick => ({
           x: tick.d * 24 * 60 * 60 * 1000, // approximate date based on index
           o: tick.o, // open
           h: tick.h, // high
@@ -100,6 +221,21 @@ export const StockChart: React.FC<StockChartProps> = ({ data, title = 'Stock Pri
   const options = {
     responsive: true,
     maintainAspectRatio: false,
+    animation: {
+      duration: 0, // Disable all animations
+    },
+    transitions: {
+      active: {
+        animation: {
+          duration: 0
+        }
+      },
+      resize: {
+        animation: {
+          duration: 0
+        }
+      }
+    },
     interaction: {
       intersect: false,
       mode: 'index' as const,
@@ -151,27 +287,7 @@ export const StockChart: React.FC<StockChartProps> = ({ data, title = 'Stock Pri
           },
         },
       },
-      zoom: {
-        pan: {
-          enabled: true,
-          mode: 'xy' as const,
-          threshold: 10,
-        },
-        zoom: {
-          wheel: {
-            enabled: true,
-          },
-          pinch: {
-            enabled: true,
-          },
-          mode: 'xy' as const,
-          sensitivity: 0.1,
-        },
-        limits: {
-          x: { min: 'original' as const, max: 'original' as const },
-          y: { min: 'original' as const, max: 'original' as const },
-        },
-      },
+
     },
     scales: {
       x: {
@@ -207,16 +323,59 @@ export const StockChart: React.FC<StockChartProps> = ({ data, title = 'Stock Pri
     <div className="w-full bg-white rounded-lg shadow-lg p-6">
       <div className="flex justify-between items-center mb-4">
         <div className="text-sm text-gray-600">
-          Use mouse wheel to zoom, drag to pan
+          <div>Showing {visibleData.length} of {data.length} data points (from {windowStart + 1} to {windowStart + visibleData.length})</div>
+          <div className="text-xs mt-1 text-gray-500">Drag the chart area to pan • Use zoom buttons to change time range</div>
         </div>
-        <button
-          onClick={resetZoom}
-          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200 text-sm font-medium"
-        >
-          Reset Zoom
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={zoomIn}
+            disabled={windowSize <= 10}
+            className="px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+          >
+            Zoom In
+          </button>
+          <button
+            onClick={zoomOut}
+            disabled={windowSize >= data.length}
+            className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+          >
+            Zoom Out
+          </button>
+          <button
+            onClick={resetView}
+            className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm"
+          >
+            Reset
+          </button>
+        </div>
       </div>
-      <div style={{ position: 'relative', height: '500px', width: '100%' }}>
+
+      {/* Pan indicator bar */}
+      <div className="mb-4">
+        <div className="relative w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+          <div
+            className="absolute h-full bg-blue-500 rounded-full transition-all duration-150"
+            style={{
+              left: `${(windowStart / data.length) * 100}%`,
+              width: `${(windowSize / data.length) * 100}%`
+            }}
+          />
+        </div>
+        <div className="flex justify-between text-xs text-gray-500 mt-1">
+          <span>Start of data</span>
+          <span>End of data</span>
+        </div>
+      </div>
+
+      <div
+        ref={panRef}
+        style={{ position: 'relative', height: '500px', width: '100%' }}
+        className={`select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+        onMouseDown={handleMouseDown}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         <Chart ref={chartRef} type="candlestick" data={chartData} options={options} />
       </div>
     </div>
