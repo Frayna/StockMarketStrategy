@@ -9,6 +9,7 @@ import {
   TimeScale,
   LineElement,
   PointElement,
+  LineController,
   LegendItem,
 } from 'chart.js';
 import { Chart } from 'react-chartjs-2';
@@ -26,6 +27,7 @@ ChartJS.register(
   TimeScale,
   LineElement,
   PointElement,
+  LineController,
   CandlestickController,
   CandlestickElement,
   zoomPlugin
