@@ -7,6 +7,8 @@ import {
   Tooltip,
   Legend,
   TimeScale,
+  LineElement,
+  PointElement,
 } from 'chart.js';
 import { Chart } from 'react-chartjs-2';
 import { CandlestickController, CandlestickElement } from 'chartjs-chart-financial';
@@ -21,6 +23,8 @@ ChartJS.register(
   Tooltip,
   Legend,
   TimeScale,
+  LineElement,
+  PointElement,
   CandlestickController,
   CandlestickElement,
   zoomPlugin
@@ -39,6 +43,22 @@ export const StockChart: React.FC<StockChartProps> = ({ data, title = 'Stock Pri
       chartRef.current.resetZoom();
     }
   };
+
+  // Calculate percentage-based compounding effect
+  const initialPrice = data.length > 0 ? data[0].c : 0;
+  const finalPrice = data.length > 0 ? data[data.length - 1].c : 0;
+
+  // Calculate the daily growth rate that would result in the same total return
+  const totalReturn = (finalPrice - initialPrice) / initialPrice;
+  const dailyGrowthRate = Math.pow(1 + totalReturn, 1 / (data.length - 1)) - 1;
+
+  const compoundingData = data.map((tick, index) => {
+    const compoundedValue = initialPrice * Math.pow(1 + dailyGrowthRate, index);
+    return {
+      x: tick.d * 24 * 60 * 60 * 1000,
+      y: compoundedValue,
+    };
+  });
 
   const chartData = {
     datasets: [
@@ -59,6 +79,18 @@ export const StockChart: React.FC<StockChartProps> = ({ data, title = 'Stock Pri
         borderColor: '#333',
         borderWidth: 1,
       } as any, // Type assertion to bypass strict typing issues
+      {
+        type: 'line' as const,
+        label: `Compound Growth (${(dailyGrowthRate * 100).toFixed(3)}% daily)`,
+        data: compoundingData,
+        borderColor: '#8b5cf6',
+        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+        borderWidth: 3,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        fill: false,
+        tension: 0,
+      },
     ],
   };
 
@@ -79,7 +111,13 @@ export const StockChart: React.FC<StockChartProps> = ({ data, title = 'Stock Pri
     },
     plugins: {
       legend: {
-        display: false, // Hide legend for cleaner look
+        display: true,
+        position: 'top' as const,
+        labels: {
+          filter: function(item) {
+            return item.text !== 'Stock Price'; // Hide candlestick legend for cleaner look
+          }
+        }
       },
       title: {
         display: true,

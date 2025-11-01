@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useStockData } from '../hooks/useStockData';
 import { StockChart } from './StockChart';
+import { StockStats } from './StockStats';
 
 export const StockDataDisplay: React.FC = () => {
   const [symbol, setSymbol] = useState('1rTCW8');
@@ -80,26 +81,7 @@ export const StockDataDisplay: React.FC = () => {
             <div className="w-full mb-8">
               <StockChart data={data} title={stockName ? `${stockName} (${symbol})` : `${symbol} Stock Price Chart`} />
             </div>
-            <div className="max-w-7xl mx-auto">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div className="bg-white rounded-lg shadow p-6 text-center">
-                  <div className="text-sm font-medium text-gray-500 mb-2">Data Points</div>
-                  <div className="text-2xl font-bold text-gray-900">{data.length}</div>
-                </div>
-                <div className="bg-white rounded-lg shadow p-6 text-center">
-                  <div className="text-sm font-medium text-gray-500 mb-2">Latest Close Price</div>
-                  <div className="text-2xl font-bold text-green-600">€{data[data.length - 1]?.c.toFixed(2)}</div>
-                </div>
-                <div className="bg-white rounded-lg shadow p-6 text-center">
-                  <div className="text-sm font-medium text-gray-500 mb-2">Latest High</div>
-                  <div className="text-2xl font-bold text-blue-600">€{data[data.length - 1]?.h.toFixed(2)}</div>
-                </div>
-                <div className="bg-white rounded-lg shadow p-6 text-center">
-                  <div className="text-sm font-medium text-gray-500 mb-2">Latest Low</div>
-                  <div className="text-2xl font-bold text-red-600">€{data[data.length - 1]?.l.toFixed(2)}</div>
-                </div>
-              </div>
-            </div>
+            <StockStats data={data} />
           </>
         ) : (
           <div className="text-center py-12">
