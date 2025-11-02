@@ -215,6 +215,21 @@ export const StockChart: React.FC<StockChartProps> = ({ data, title = 'Stock Pri
     }
   });
 
+  // Calculate leveraged daily rate compound growth (smooth compound using actual leveraged daily rate)
+  // First get the final leveraged value to calculate the actual leveraged daily rate
+  const finalLeveragedValue = currentLeveragedValue;
+  const actualLeveragedTotalReturn = initialPrice !== 0 ? (finalLeveragedValue - initialPrice) / initialPrice : 0;
+  const actualLeveragedDailyRate = visibleData.length > 1 ? Math.pow(1 + actualLeveragedTotalReturn, 1 / (visibleData.length - 1)) - 1 : 0;
+
+  // Create smooth compound growth using the actual leveraged daily rate
+  const leveragedDailyRateCompoundData = visibleData.map((tick, index) => {
+    const compoundedValue = initialPrice * Math.pow(1 + actualLeveragedDailyRate, index);
+    return {
+      x: tick.d * 24 * 60 * 60 * 1000,
+      y: compoundedValue,
+    };
+  });
+
   const chartData = {
     datasets: [
       {
@@ -258,6 +273,19 @@ export const StockChart: React.FC<StockChartProps> = ({ data, title = 'Stock Pri
         fill: false,
         tension: 0,
         borderDash: [5, 5], // Dashed line to distinguish from regular compound growth
+      },
+      {
+        type: 'line' as const,
+        label: `Leveraged Daily Rate Compound (${(actualLeveragedDailyRate * 100).toFixed(3)}% daily)`,
+        data: leveragedDailyRateCompoundData,
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        fill: false,
+        tension: 0,
+        borderDash: [10, 2, 2, 2], // Distinctive dash-dot pattern
       },
     ],
   };
