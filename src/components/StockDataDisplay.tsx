@@ -3,6 +3,7 @@ import { useStockData } from '../hooks/useStockData';
 import { StockChart } from './StockChart';
 import { StockStats } from './StockStats';
 import { CompoundComparisonPieChart } from './CompoundComparisonPieChart';
+import { LeveragedComparisonPieChart } from './LeveragedComparisonPieChart';
 import { StockTick } from '../types/stockData';
 
 export const StockDataDisplay: React.FC = () => {
@@ -100,15 +101,31 @@ export const StockDataDisplay: React.FC = () => {
                 onVisibleDataChange={handleVisibleDataChange}
               />
             </div>
+            {/* Main Content Section */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
+              {/* Pie Charts Column */}
               <div className="w-full">
-                <CompoundComparisonPieChart
-                  data={visibleData.length > 0 ? visibleData : data}
-                  title={`Price vs Compound Analysis - ${stockName || symbol}`}
-                  isFiltered={visibleData.length > 0 && visibleData.length < data.length}
-                  totalDataPoints={data.length}
-                />
+                <div className="grid grid-cols-1 gap-8">
+                  <div className="w-full">
+                    <CompoundComparisonPieChart
+                      data={visibleData.length > 0 ? visibleData : data}
+                      title={`Price vs Compound Analysis - ${stockName || symbol}`}
+                      isFiltered={visibleData.length > 0 && visibleData.length < data.length}
+                      totalDataPoints={data.length}
+                    />
+                  </div>
+                  <div className="w-full">
+                    <LeveragedComparisonPieChart
+                      data={visibleData.length > 0 ? visibleData : data}
+                      title={`2x Leveraged vs Compound Analysis - ${stockName || symbol}`}
+                      isFiltered={visibleData.length > 0 && visibleData.length < data.length}
+                      totalDataPoints={data.length}
+                    />
+                  </div>
+                </div>
               </div>
+
+              {/* Statistics Column */}
               <div className="w-full">
                 <StockStats
                   data={visibleData.length > 0 ? visibleData : data}
